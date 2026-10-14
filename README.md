@@ -1,12 +1,15 @@
 # ThreatPulse (v1.0.0) ⚡
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://python.org)
+[![Live Web Demo](https://img.shields.io/badge/Live%20Demo-Interactive%20Dashboard-10b981?style=flat&logo=google-chrome&logoColor=white)](https://voobrazhenie21-lab.github.io/threat-pulse/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero External Dependencies](https://img.shields.io/badge/dependencies-zero%20(stdlib)-success.svg)](pyproject.toml)
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-v14-red.svg)](https://attack.mitre.org/)
 [![Wazuh SIEM Ready](https://img.shields.io/badge/SIEM-Wazuh%20CDB%20Export-orange.svg)](https://wazuh.com)
 
 **Fast, zero-dependency Threat Intelligence & IOC enrichment CLI built for SOC Analysts, Incident Responders, and Blue Teams.**
+
+> 🌐 **[Try the Interactive Live Web Demo on GitHub Pages](https://voobrazhenie21-lab.github.io/threat-pulse/)**
 
 ```text
   _____ _                         _   _____       _           
