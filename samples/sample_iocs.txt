@@ -1,0 +1,22 @@
+# Sample ThreatPulse IOC List for Triage Testing
+
+# 1. Tor Exit Node
+185.220.101.5
+
+# 2. RFC 1918 Private Enterprise IPs
+192.168.1.105
+10.0.4.15
+172.16.50.1
+
+# 3. Famous Malware Hashes (Mimikatz & WannaCry)
+a60c52bb53a5c0b89cf53dc5bb7c2c129219b16e4ee7d9c6e3b5e43a9b1c9d2f
+84c82835a5d21bbcf75a61706d8ab549
+
+# 4. Known Internet Scanner
+198.20.69.74
+
+# 5. DGA Suspicious Domain
+xkjqpw987dfghk123498.top
+
+# 6. Malicious Executable URL (Defanged)
+hxxps://evil-delivery-server[.]buzz/payload.exe

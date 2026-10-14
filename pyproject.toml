@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "threat-pulse"
+version = "1.0.0"
+description = "Fast, zero-dependency Threat Intelligence & IOC enrichment CLI for SOC Analysts & Incident Responders"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Aleksei Zharkou", email = "lyosha.zharkov.98@mail.ru" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent"
+]
+keywords = [
+    "cybersecurity",
+    "threat-intelligence",
+    "ioc-enrichment",
+    "soc",
+    "blue-team",
+    "incident-response",
+    "abuseipdb",
+    "virustotal",
+    "mitre-attack",
+    "wazuh"
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0"
+]
+
+[project.scripts]
+threat-pulse = "threat_pulse.cli:main"
+tp = "threat_pulse.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["threat_pulse*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
