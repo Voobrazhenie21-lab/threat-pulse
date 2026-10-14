@@ -214,16 +214,38 @@ def main() -> int:
         parser.print_help()
         return 1
 
-    # Enrich all targets
+    # Enrich all targets (parallelized for batch files)
     results: List[EnrichmentResult] = []
-    for target in iocs_to_check:
-        res = enrich_single_ioc(
-            target,
-            cache=cache,
-            abuse_api_key=args.api_key,
-            use_cache=use_cache
-        )
-        results.append(res)
+    if len(iocs_to_check) > 1:
+        import concurrent.futures
+        future_map = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            for target in iocs_to_check:
+                fut = executor.submit(
+                    enrich_single_ioc,
+                    target,
+                    cache=cache,
+                    abuse_api_key=args.api_key,
+                    use_cache=use_cache
+                )
+                future_map[fut] = target
+
+            completed_map = {}
+            for fut in concurrent.futures.as_completed(future_map):
+                t = future_map[fut]
+                completed_map[t] = fut.result()
+
+            # Maintain original order of inputs
+            results = [completed_map[t] for t in iocs_to_check if t in completed_map]
+    else:
+        results = [
+            enrich_single_ioc(
+                iocs_to_check[0],
+                cache=cache,
+                abuse_api_key=args.api_key,
+                use_cache=use_cache
+            )
+        ]
 
     # Determine default format
     selected_format = args.format
