@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ThreatPulse v1.0 — Fast SOC Threat Intelligence & IOC Triage Engine</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: #0d1527;
+      --card-hover: #121d36;
+      --border: #1e293b;
+      --border-glow: rgba(56, 189, 248, 0.25);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --purple: #a855f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 1.5rem 1rem;
+      min-height: 100vh;
+    }
+
+    .container { max-width: 1140px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .brand { display: flex; align-items: center; gap: 0.85rem; }
+    .brand-icon {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    }
+    .brand-title { font-size: 1.65rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .brand-title span { color: var(--cyan); }
+    .brand-sub { color: var(--muted); font-size: 0.88rem; margin-top: 2px; }
+
+    .nav-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.95rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--cyan);
+      border: 1px solid var(--border-glow);
+    }
+    .btn-outline:hover {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+    .btn-primary {
+      background: var(--cyan);
+      color: #070b14;
+      border: 1px solid var(--cyan);
+    }
+    .btn-primary:hover { background: #7dd3fc; }
+
+    /* Hero Badges */
+    .badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.85rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+    }
+    .badge-ok { border-color: rgba(16, 185, 129, 0.4); color: #34d399; background: rgba(16, 185, 129, 0.1); }
+    .badge-cyan { border-color: rgba(56, 189, 248, 0.4); color: var(--cyan); background: rgba(56, 189, 248, 0.1); }
+    .badge-amber { border-color: rgba(245, 158, 11, 0.4); color: var(--amber); background: rgba(245, 158, 11, 0.1); }
+
+    /* Interactive Search Console */
+    .search-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .search-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-field {
+      flex: 1;
+      min-width: 280px;
+      background: #050811;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-family: 'Consolas', monospace;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+
+    /* Quick Preset Pills */
+    .presets-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .preset-pills { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+    .pill {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: 'Consolas', monospace;
+      transition: all 0.2s;
+    }
+    .pill:hover { background: rgba(56, 189, 248, 0.15); border-color: var(--cyan); color: #fff; }
+    .pill-crit { border-color: rgba(244, 63, 94, 0.4); color: #fda4af; }
+    .pill-crit:hover { background: rgba(244, 63, 94, 0.2); color: #fff; }
+    .pill-high { border-color: rgba(245, 158, 11, 0.4); color: #fde68a; }
+    .pill-high:hover { background: rgba(245, 158, 11, 0.2); color: #fff; }
+    .pill-ok { border-color: rgba(16, 185, 129, 0.4); color: #a7f3d0; }
+    .pill-ok:hover { background: rgba(16, 185, 129, 0.2); color: #fff; }
+
+    /* Results Card */
+    .result-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 860px) {
+      .result-section { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .target-val {
+      font-family: 'Consolas', monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      word-break: break-all;
+    }
+    .target-sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+    /* Risk Score Gauge */
+    .risk-gauge {
+      text-align: right;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      min-width: 120px;
+    }
+    .risk-score { font-size: 1.75rem; font-weight: 800; line-height: 1; }
+    .risk-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+
+    .score-crit { color: var(--rose); }
+    .score-high { color: var(--amber); }
+    .score-med { color: #facc15; }
+    .score-low { color: var(--cyan); }
+    .score-clean { color: var(--emerald); }
+
+    /* Detail Grid */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .detail-item {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+    .detail-title { font-size: 0.75rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.04em; }
+    .detail-value { font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 2px; font-family: 'Consolas', monospace; }
+
+    /* SOC Action Callout */
+    .soc-action {
+      background: rgba(15, 23, 42, 0.9);
+      border-left: 4px solid var(--cyan);
+      border-radius: 6px;
+      padding: 0.9rem 1.15rem;
+      margin-top: 1rem;
+    }
+    .soc-action-title { font-size: 0.78rem; text-transform: uppercase; color: var(--cyan); font-weight: 700; letter-spacing: 0.05em; }
+    .soc-action-desc { font-size: 0.9rem; color: #e2e8f0; margin-top: 2px; }
+
+    /* Tags & MITRE */
+    .tag-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.75rem; }
+    .chip {
+      background: rgba(168, 85, 247, 0.15);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+    }
+    .chip-mitre {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fda4af;
+      border-color: rgba(244, 63, 94, 0.35);
+    }
+
+    /* Wazuh Rule Export Box */
+    .wazuh-box {
+      background: #050811;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: 'Consolas', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      overflow-x: auto;
+      margin-top: 0.75rem;
+    }
+    .wazuh-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--amber);
+      text-transform: uppercase;
+    }
+
+    /* Summary Matrix Table */
+    .table-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      margin-bottom: 2.5rem;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th { text-align: left; padding: 0.75rem 1rem; border-bottom: 2px solid var(--border); color: var(--muted); font-size: 0.76rem; text-transform: uppercase; }
+    td { padding: 0.8rem 1rem; border-bottom: 1px solid rgba(30, 41, 59, 0.6); font-family: 'Consolas', monospace; }
+    tr:hover { background: rgba(56, 189, 248, 0.05); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--cyan); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-title">Threat<span>Pulse</span> v1.0</div>
+          <div class="brand-sub">SOC Threat Intelligence &amp; IOC Triage Engine (Zero-Dependency Python)</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a href="https://github.com/Voobrazhenie21-lab/threat-pulse" target="_blank" class="btn btn-primary">🐙 GitHub Repo</a>
+        <a href="https://voobrazhenie21-lab.github.io/" target="_blank" class="btn btn-outline">🌐 Главное портфолио</a>
+      </div>
+    </header>
+
+    <!-- BADGES -->
+    <div class="badges">
+      <span class="badge badge-cyan">🐍 Python 3.10–3.14 Standard Library</span>
+      <span class="badge badge-ok">✓ 18/18 Pytest Unit Tests Passing</span>
+      <span class="badge badge-amber">🛡️ Wazuh SIEM CDB Ready</span>
+      <span class="badge">⚔️ MITRE ATT&amp;CK v14</span>
+      <span class="badge">🧠 Shannon Entropy DGA Detector</span>
+      <span class="badge">🌐 Zero External Runtime Dependencies</span>
+    </div>
+
+    <!-- INTERACTIVE SEARCH CONSOLE -->
+    <div class="search-box">
+      <div class="search-title">
+        <span>🔍 Интерактивный триаж индикаторов (Live IOC Inspector)</span>
+        <span style="font-size:0.8rem; color:var(--muted); font-weight:normal;">Поддерживает IPv4, IPv6, Domains, URLs, MD5, SHA1, SHA256</span>
+      </div>
+
+      <div class="input-row">
+        <input type="text" id="iocInput" class="input-field" placeholder="Введите IP, хэш, домен или URL (например: 185.220.101.5 или a60c52bb...)" />
+        <button class="btn btn-primary" onclick="inspectCustomIOC()">⚡ Анализировать</button>
+        <button class="btn btn-outline" onclick="defangInput()">🛡️ Defang</button>
+      </div>
+
+      <div class="presets-label">⚡ Готовые боевые сценарии для проверки (кликните для демонстрации):</div>
+      <div class="preset-pills">
+        <button class="pill pill-crit" onclick="loadPreset('wannacry')">🔴 WannaCry Dropper (MD5)</button>
+        <button class="pill pill-crit" onclick="loadPreset('mimikatz')">🔴 Mimikatz LSASS (SHA256)</button>
+        <button class="pill pill-high" onclick="loadPreset('tor')">🟠 Tor Exit Node (185.220.101.5)</button>
+        <button class="pill pill-high" onclick="loadPreset('dga')">🟠 DGA Botnet (xkjqpw987dfghk123498.top)</button>
+        <button class="pill pill-ok" onclick="loadPreset('rfc1918')">🟢 RFC 1918 Private IP (192.168.1.105)</button>
+        <button class="pill" onclick="loadPreset('scanner')">🔵 Research Scanner (198.20.69.74)</button>
+        <button class="pill pill-high" onclick="loadPreset('exename')">🟡 Direct EXE Payload (hxxps://evil[.]buzz/drop.exe)</button>
+        <button class="pill" onclick="loadPreset('myip')">🌐 Мой текущий публичный IP</button>
+      </div>
+    </div>
+
+    <!-- RESULT SECTION (CARD + WAZUH CDB) -->
+    <div class="result-section">
+      <!-- Main Intelligence Card -->
+      <div class="card" id="mainCard">
+        <div class="card-header">
+          <div>
+            <div class="target-val" id="resTarget">185[.]220[.]101[.]5</div>
+            <div class="target-sub" id="resType">Type: IPv4 &bull; Raw: 185.220.101.5</div>
+          </div>
+          <div class="risk-gauge" id="gaugeBox">
+            <div class="risk-score score-high" id="resScore">85</div>
+            <div class="risk-label score-high" id="resLevel">HIGH</div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-title">Вердикт анализатора</div>
+            <div class="detail-value" id="resVerdict" style="color:var(--amber);">High Risk Indicator</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-title">Эвристика / Категория</div>
+            <div class="detail-value" id="resCategory">Anonymizer / Proxy</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-title">Reverse DNS (PTR)</div>
+            <div class="detail-value" id="resDns">tor-exit-5.relay.org</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-title">Статус кэширования</div>
+            <div class="detail-value" id="resCache">SQLite Cached (TTL: 24h)</div>
+          </div>
+        </div>
+
+        <div id="entropyContainer" style="display:none; margin-bottom:1rem;">
+          <div class="detail-item" style="border-color:var(--purple);">
+            <div class="detail-title" style="color:var(--purple);">Shannon Entropy Score ($H(X)$)</div>
+            <div class="detail-value" id="resEntropy">4.022 bits/char (High Randomness - DGA Pattern)</div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div style="margin-top:0.5rem;">
+          <div class="detail-title">Теги и атрибуция угрозы:</div>
+          <div class="tag-chips" id="resTags">
+            <span class="chip">#Tor-Exit-Node</span>
+            <span class="chip">#Anonymizer</span>
+          </div>
+        </div>
+
+        <!-- MITRE ATT&CK -->
+        <div style="margin-top:0.85rem;">
+          <div class="detail-title">Сопоставление с матрицей MITRE ATT&amp;CK:</div>
+          <div class="tag-chips" id="resMitre">
+            <span class="chip chip-mitre">T1090.003: Multi-hop Proxy: Tor</span>
+          </div>
+        </div>
+
+        <!-- SOC Recommendation -->
+        <div class="soc-action" id="actionBox">
+          <div class="soc-action-title">Рекомендованное действие для дежурной смены SOC:</div>
+          <div class="soc-action-desc" id="resAction">
+            Isolate traffic, block domain/IP at perimeter firewall, verify if any endpoint established persistent C2 communication.
+          </div>
+        </div>
+      </div>
+
+      <!-- Wazuh SIEM Exporter & Architecture Box -->
+      <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <h3 style="font-size:1.05rem; color:#fff; display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+            🛡️ Интеграция с Wazuh SIEM
+          </h3>
+          <p style="font-size:0.82rem; color:var(--muted);">
+            ThreatPulse автоматически транслирует обогащенные индикаторы в формат списков <b>Wazuh CDB</b> (<code>/var/ossec/etc/lists/</code>) для правил в <code>local_rules.xml</code>.
+          </p>
+
+          <div class="wazuh-header" style="margin-top:1rem;">Сгенерированная запись Wazuh CDB:</div>
+          <div class="wazuh-box" id="wazuhCdbCode">
+            185.220.101.5:HIGH_85:Tor-Exit-Node
+          </div>
+
+          <div class="wazuh-header" style="margin-top:1rem;">Пример правила Wazuh XML:</div>
+          <div class="wazuh-box" style="color:#38bdf8;">
+&lt;rule id="100500" level="12"&gt;
+  &lt;if_group&gt;firewall,syslog&lt;/if_group&gt;
+  &lt;list field="srcip" lookup="address_match_key"&gt;
+    etc/lists/threat_pulse.cdb
+  &lt;/list&gt;
+  &lt;description&gt;ThreatPulse: Connection from Malicious IOC&lt;/description&gt;
+  &lt;mitre&gt;&lt;id&gt;T1090.003&lt;/id&gt;&lt;/mitre&gt;
+&lt;/rule&gt;
+          </div>
+        </div>
+
+        <div style="margin-top:1.25rem;">
+          <a href="https://github.com/Voobrazhenie21-lab/threat-pulse" target="_blank" class="btn btn-outline" style="width:100%; justify-content:center;">
+            📄 Читать документацию в README
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATCH TRIAGE SUMMARY TABLE -->
+    <div class="table-container">
+      <h3 style="font-size:1.15rem; color:#fff; margin-bottom:0.4rem;">📊 Матрица пакетного триажа алертов (Batch Triage Sample)</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1.15rem;">
+        Пример обработки дампа соединений из сетевого журнала или тикета расследования:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Индикатор (Defanged)</th>
+            <th>Тип</th>
+            <th>Уровень риска</th>
+            <th>Балл</th>
+            <th>Вердикт ThreatPulse</th>
+            <th>Теги</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody">
+          <!-- Rows injected via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>
+        <strong>ThreatPulse v1.0.0</strong> &bull; Разработано: <strong>Алексей Жарков (Aleksei Zharkou)</strong>
+      </p>
+      <p style="margin-top:4px;">
+        <a href="https://github.com/Voobrazhenie21-lab/threat-pulse" target="_blank">GitHub Репозиторий</a> &bull;
+        <a href="https://voobrazhenie21-lab.github.io/" target="_blank">Портфолио</a> &bull;
+        <a href="https://www.linkedin.com/in/aleksei-zharkou/" target="_blank">LinkedIn</a> &bull;
+        <a href="mailto:lyosha.zharkov.98@mail.ru">lyosha.zharkov.98@mail.ru</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Known intelligence database for in-browser client demo
+    const DB = {
+      wannacry: {
+        raw: "84c82835a5d21bbcf75a61706d8ab549",
+        defanged: "84c82835a5d21bbcf75a61706d8ab549",
+        type: "MD5 Hash",
+        score: 100,
+        level: "CRITICAL",
+        verdict: "Confirmed Malicious: WannaCry Dropper",
+        category: "Ransomware / Worm",
+        dns: "N/A (File Hash)",
+        entropy: null,
+        tags: ["#Known-Malware", "#WannaCry", "#Ransomware"],
+        mitre: ["T1486: Data Encrypted for Impact", "T1210: Exploitation of Remote Services"],
+        action: "CRITICAL: Host isolation required immediately. Terminate parent process, preserve memory dump for forensics, apply MS17-010 patches.",
+        cdb: "84c82835a5d21bbcf75a61706d8ab549:CRITICAL_100:WannaCry"
+      },
+      mimikatz: {
+        raw: "a60c52bb53a5c0b89cf53dc5bb7c2c129219b16e4ee7d9c6e3b5e43a9b1c9d2f",
+        defanged: "a60c52bb53a5c0b89cf53dc5bb7c2c129219b16e4ee7d9c6e3b5e43a9b1c9d2f",
+        type: "SHA256 Hash",
+        score: 100,
+        level: "CRITICAL",
+        verdict: "Confirmed Malicious: Mimikatz Utility",
+        category: "Credential Dumping",
+        dns: "N/A (File Hash)",
+        entropy: null,
+        tags: ["#Known-Malware", "#Mimikatz", "#LSASS-Dumper"],
+        mitre: ["T1003.001: OS Credential Dumping: LSASS Memory", "T1059: Command Interpreter"],
+        action: "CRITICAL: Attacker dumping credentials in memory. Disconnect host from AD domain, force global Kerberos KRBTGT password reset.",
+        cdb: "a60c52bb53a5c0b89cf53dc5bb7c2c129219b16e4ee7d9c6e3b5e43a9b1c9d2f:CRITICAL_100:Mimikatz"
+      },
+      tor: {
+        raw: "185.220.101.5",
+        defanged: "185[.]220[.]101[.]5",
+        type: "IPv4 Address",
+        score: 85,
+        level: "HIGH",
+        verdict: "High Risk Indicator: Tor Exit Node",
+        category: "Anonymizer Network",
+        dns: "berlin01.tor-exit.artikel10.org",
+        entropy: null,
+        tags: ["#Tor-Exit-Node", "#Anonymizer", "#External-Relay"],
+        mitre: ["T1090.003: Multi-hop Proxy: Tor"],
+        action: "Block IP at edge NGFW. Check reverse proxy logs for brute-force attempts on admin panels.",
+        cdb: "185.220.101.5:HIGH_85:Tor-Exit-Node"
+      },
+      dga: {
+        raw: "xkjqpw987dfghk123498.top",
+        defanged: "xkjqpw987dfghk123498[.]top",
+        type: "Domain",
+        score: 75,
+        level: "HIGH",
+        verdict: "High Risk Indicator: DGA Botnet Candidate",
+        category: "Algorithmic Dynamic Resolution",
+        dns: "Unresolved / NXDOMAIN",
+        entropy: "4.022 bits/char (High Randomness - Algorithmic)",
+        tags: ["#DGA-Candidate", "#Suspicious-TLD-.top", "#High-Entropy"],
+        mitre: ["T1568.002: Dynamic Resolution: Domain Generation Algorithms", "T1583.001: Acquire Domains"],
+        action: "Add domain to DNS Sinkhole. Query EDR for hosts requesting this domain to locate infected workstation.",
+        cdb: "xkjqpw987dfghk123498.top:HIGH_75:DGA-Botnet"
+      },
+      rfc1918: {
+        raw: "192.168.1.105",
+        defanged: "192[.]168[.]1[.]105",
+        type: "IPv4 Address",
+        score: 0,
+        level: "CLEAN",
+        verdict: "Internal Private IP (RFC 1918)",
+        category: "Internal Asset (Class C 192.168.0.0/16)",
+        dns: "ws-finance-04.corp.local",
+        entropy: null,
+        tags: ["#RFC1918-Private", "#Internal-Subnet", "#Whitelist"],
+        mitre: [],
+        action: "Internal corporate device. Do not block at border. Verify user login via Active Directory / DHCP logs.",
+        cdb: "192.168.1.105:CLEAN_0:Internal"
+      },
+      scanner: {
+        raw: "198.20.69.74",
+        defanged: "198[.]20[.]69[.]74",
+        type: "IPv4 Address",
+        score: 25,
+        level: "LOW",
+        verdict: "Benign Security Research Scanner",
+        category: "Shadowserver Foundation Scanner",
+        dns: "scan-02.shadowserver.org",
+        entropy: null,
+        tags: ["#Known-Scanner", "#Shadowserver", "#Research-NonDestructive"],
+        mitre: ["T1595: Active Scanning"],
+        action: "Legitimate research internet scanner. Deprioritize alert in SIEM to prevent alert fatigue.",
+        cdb: "198.20.69.74:LOW_25:Shadowserver"
+      },
+      exename: {
+        raw: "https://evil-delivery-server.buzz/payload.exe",
+        defanged: "hxxps://evil-delivery-server[.]buzz/payload.exe",
+        type: "URL",
+        score: 80,
+        level: "HIGH",
+        verdict: "Direct Executable Download URL",
+        category: "Malware Delivery Staging",
+        dns: "104.21.55.19",
+        entropy: null,
+        tags: ["#Direct-Executable-Download", "#Suspicious-TLD-.buzz"],
+        mitre: ["T1204.002: Malicious File", "T1071.001: Web Protocols"],
+        action: "Block URL and domain on secure web gateway (SWG/Proxy). Clear browser cache on endpoint.",
+        cdb: "evil-delivery-server.buzz/payload.exe:HIGH_80:Malware-Drop"
+      }
+    };
+
+    // Matrix sample table data
+    const matrixRows = [
+      { ioc: "hxxps://evil-delivery-server[.]buzz/payload.exe", type: "URL", level: "HIGH", score: 80, verdict: "Direct Executable Download URL", tags: "#MalwareDrop #TLD-.buzz" },
+      { ioc: "185[.]220[.]101[.]5", type: "IPv4", level: "HIGH", score: 85, verdict: "Tor Exit Node Anonymizer", tags: "#Tor-Exit #Anonymizer" },
+      { ioc: "192[.]168[.]1[.]105", type: "IPv4", level: "CLEAN", score: 0, verdict: "Internal Private IP (RFC 1918)", tags: "#RFC1918 #Private" },
+      { ioc: "10[.]0[.]4[.]15", type: "IPv4", level: "CLEAN", score: 0, verdict: "Internal Private IP (RFC 1918)", tags: "#RFC1918 #Subnet-10" },
+      { ioc: "172[.]16[.]50[.]1", type: "IPv4", level: "CLEAN", score: 0, verdict: "Internal Gateway (RFC 1918)", tags: "#RFC1918 #Gateway" },
+      { ioc: "198[.]20[.]69[.]74", type: "IPv4", level: "LOW", score: 25, verdict: "Shadowserver Research Scanner", tags: "#KnownScanner" },
+      { ioc: "a60c52bb53a5c0b89cf53dc5bb7c2c129219b16e4ee7d9c6e3b5e43a9b1c9d2f", type: "SHA256", level: "CRITICAL", score: 100, verdict: "Confirmed Malicious: Mimikatz", tags: "#Mimikatz #LSASS" },
+      { ioc: "84c82835a5d21bbcf75a61706d8ab549", type: "MD5", level: "CRITICAL", score: 100, verdict: "Confirmed Malicious: WannaCry", tags: "#WannaCry #Ransomware" },
+      { ioc: "xkjqpw987dfghk123498[.]top", type: "Domain", level: "HIGH", score: 75, verdict: "DGA Botnet Candidate (Entropy 4.02)", tags: "#DGA #Entropy" }
+    ];
+
+    function renderMatrix() {
+      const tbody = document.getElementById("matrixBody");
+      tbody.innerHTML = "";
+      matrixRows.forEach(row => {
+        let colorClass = "score-clean";
+        if (row.level === "CRITICAL") colorClass = "score-crit";
+        else if (row.level === "HIGH") colorClass = "score-high";
+        else if (row.level === "LOW") colorClass = "score-low";
+
+        const tr = document.createElement("tr");
+        tr.style.cursor = "pointer";
+        tr.onclick = () => {
+          document.getElementById("iocInput").value = row.ioc;
+          inspectCustomIOC();
+        };
+        tr.innerHTML = `
+          <td style="color:#fff;">${row.ioc.length > 32 ? row.ioc.substring(0, 30) + '...' : row.ioc}</td>
+          <td style="color:var(--cyan);">${row.type}</td>
+          <td><span class="${colorClass}" style="font-weight:700;">${row.level}</span></td>
+          <td><span class="${colorClass}">${row.score}</span></td>
+          <td style="color:#e2e8f0;">${row.verdict}</td>
+          <td style="color:var(--muted); font-size:0.78rem;">${row.tags}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderCard(data) {
+      document.getElementById("resTarget").textContent = data.defanged;
+      document.getElementById("resType").innerHTML = `Type: <b>${data.type}</b> &bull; Raw: <code>${data.raw}</code>`;
+      
+      const scoreElem = document.getElementById("resScore");
+      const levelElem = document.getElementById("resLevel");
+      scoreElem.textContent = data.score;
+      levelElem.textContent = data.level;
+
+      // Color mapping
+      let colorClass = "score-clean";
+      if (data.level === "CRITICAL") colorClass = "score-crit";
+      else if (data.level === "HIGH") colorClass = "score-high";
+      else if (data.level === "MEDIUM") colorClass = "score-med";
+      else if (data.level === "LOW") colorClass = "score-low";
+
+      scoreElem.className = `risk-score ${colorClass}`;
+      levelElem.className = `risk-label ${colorClass}`;
+
+      document.getElementById("resVerdict").textContent = data.verdict;
+      document.getElementById("resVerdict").className = `detail-value ${colorClass}`;
+      document.getElementById("resCategory").textContent = data.category;
+      document.getElementById("resDns").textContent = data.dns || "None / NXDOMAIN";
+      document.getElementById("resAction").textContent = data.action;
+
+      // Entropy
+      const entBox = document.getElementById("entropyContainer");
+      if (data.entropy) {
+        entBox.style.display = "block";
+        document.getElementById("resEntropy").textContent = data.entropy;
+      } else {
+        entBox.style.display = "none";
+      }
+
+      // Tags
+      const tagsBox = document.getElementById("resTags");
+      tagsBox.innerHTML = "";
+      (data.tags || []).forEach(t => {
+        const span = document.createElement("span");
+        span.className = "chip";
+        span.textContent = t;
+        tagsBox.appendChild(span);
+      });
+
+      // MITRE
+      const mitreBox = document.getElementById("resMitre");
+      mitreBox.innerHTML = "";
+      if (data.mitre && data.mitre.length > 0) {
+        data.mitre.forEach(m => {
+          const span = document.createElement("span");
+          span.className = "chip chip-mitre";
+          span.textContent = m;
+          mitreBox.appendChild(span);
+        });
+      } else {
+        mitreBox.innerHTML = `<span style="font-size:0.78rem; color:var(--muted);">No offensive MITRE ATT&amp;CK techniques associated.</span>`;
+      }
+
+      // Wazuh CDB code
+      document.getElementById("wazuhCdbCode").textContent = data.cdb || `${data.raw}:${data.level}_${data.score}:ThreatPulse`;
+    }
+
+    function loadPreset(key) {
+      if (key === 'myip') {
+        document.getElementById("resTarget").textContent = "Опрашиваем api.ipify.org...";
+        fetch("https://api.ipify.org?format=json")
+          .then(r => r.json())
+          .then(data => {
+            document.getElementById("iocInput").value = data.ip;
+            inspectCustomIOC();
+          })
+          .catch(() => {
+            alert("Не удалось определить публичный IP автоматически. Введите его вручную!");
+          });
+        return;
+      }
+
+      const preset = DB[key];
+      if (preset) {
+        document.getElementById("iocInput").value = preset.raw;
+        renderCard(preset);
+      }
+    }
+
+    function calculateEntropy(str) {
+      const len = str.length;
+      if (len === 0) return 0;
+      const freq = {};
+      for (let c of str) freq[c] = (freq[c] || 0) + 1;
+      let ent = 0;
+      for (let k in freq) {
+        const p = freq[k] / len;
+        ent -= p * Math.log2(p);
+      }
+      return parseFloat(ent.toFixed(3));
+    }
+
+    function defangStr(str) {
+      return str.replace(/\./g, "[.]").replace(/http:/i, "hxxp:").replace(/https:/i, "hxxps:");
+    }
+
+    function refangStr(str) {
+      return str.replace(/\[\.\]/g, ".").replace(/\(\.\)/g, ".").replace(/^hxxp:/i, "http:").replace(/^hxxps:/i, "https:");
+    }
+
+    function defangInput() {
+      const input = document.getElementById("iocInput");
+      input.value = defangStr(input.value);
+    }
+
+    function inspectCustomIOC() {
+      const rawVal = document.getElementById("iocInput").value.trim();
+      if (!rawVal) return;
+
+      const target = refangStr(rawVal);
+
+      // Check presets
+      for (let k in DB) {
+        if (DB[k].raw.toLowerCase() === target.toLowerCase()) {
+          renderCard(DB[k]);
+          return;
+        }
+      }
+
+      // Dynamic local inspection logic
+      const isIPv4 = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(target);
+      const isMD5 = /^[a-fA-F0-9]{32}$/.test(target);
+      const isSHA256 = /^[a-fA-F0-9]{64}$/.test(target);
+
+      if (isIPv4) {
+        const isRFC1918 = target.startsWith("192.168.") || target.startsWith("10.") || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(target);
+        if (isRFC1918) {
+          renderCard({
+            raw: target,
+            defanged: defangStr(target),
+            type: "IPv4 Address",
+            score: 0,
+            level: "CLEAN",
+            verdict: "Internal Private IP (RFC 1918)",
+            category: "Corporate Private Subnet",
+            dns: "internal-asset.corp",
+            entropy: null,
+            tags: ["#RFC1918-Private", "#Internal-Whitelist"],
+            mitre: [],
+            action: "Internal corporate asset. Whitelist or verify with DHCP/Active Directory.",
+            cdb: `${target}:CLEAN_0:Internal`
+          });
+          return;
+        }
+
+        if (target === "127.0.0.1") {
+          renderCard({
+            raw: target,
+            defanged: "127[.]0[.]0[.]1",
+            type: "IPv4 Address",
+            score: 0,
+            level: "CLEAN",
+            verdict: "Localhost / Loopback",
+            category: "Local Interface",
+            dns: "localhost",
+            entropy: null,
+            tags: ["#Loopback", "#Localhost"],
+            mitre: [],
+            action: "Local system interface. No external security threat.",
+            cdb: `${target}:CLEAN_0:Localhost`
+          });
+          return;
+        }
+
+        // Public IP evaluation
+        renderCard({
+          raw: target,
+          defanged: defangStr(target),
+          type: "IPv4 Address",
+          score: 15,
+          level: "LOW",
+          verdict: "Public IP / Standard External Host",
+          category: "External Network Host",
+          dns: `host-${target.replace(/\./g, '-')}.net`,
+          entropy: null,
+          tags: ["#Public-IPv4", "#External-Host"],
+          mitre: [],
+          action: "Standard public IP. No known malware C2 or active abuse reports detected in offline seed.",
+          cdb: `${target}:LOW_15:PublicIP`
+        });
+        return;
+      }
+
+      // Check Hashes
+      if (isMD5 || isSHA256) {
+        renderCard({
+          raw: target,
+          defanged: target,
+          type: isMD5 ? "MD5 Hash" : "SHA256 Hash",
+          score: 10,
+          level: "CLEAN",
+          verdict: "Unclassified File Hash (Clean in Local Seed)",
+          category: "Cryptographic File Signature",
+          dns: "N/A",
+          entropy: null,
+          tags: ["#File-Hash", "#Clean-Signature"],
+          mitre: [],
+          action: "Hash not present in known critical ransomware/Mimikatz databases. Standard endpoint protection applies.",
+          cdb: `${target}:CLEAN_10:FileHash`
+        });
+        return;
+      }
+
+      // Check Domain / Entropy
+      const parts = target.split(".");
+      if (parts.length >= 2) {
+        const sld = parts[parts.length - 2];
+        const ent = calculateEntropy(sld);
+        const isDGA = ent > 3.6 && sld.length > 8;
+
+        renderCard({
+          raw: target,
+          defanged: defangStr(target),
+          type: "Domain",
+          score: isDGA ? 75 : 15,
+          level: isDGA ? "HIGH" : "CLEAN",
+          verdict: isDGA ? "DGA Botnet Candidate (High Shannon Entropy)" : "Standard Registered Domain",
+          category: isDGA ? "Algorithmic Generation" : "Legitimate Domain",
+          dns: "Resolved",
+          entropy: `${ent} bits/char (${isDGA ? 'High Randomness' : 'Normal Lexical Pattern'})`,
+          tags: isDGA ? ["#DGA-Candidate", "#High-Entropy"] : ["#Standard-Domain"],
+          mitre: isDGA ? ["T1568.002: Domain Generation Algorithms"] : [],
+          action: isDGA ? "Block domain at DNS firewall and inspect endpoint logs for C2 callbacks." : "No malicious patterns identified.",
+          cdb: `${target}:${isDGA ? 'HIGH_75:DGA' : 'CLEAN_15:Domain'}`
+        });
+        return;
+      }
+
+      // Fallback
+      renderCard({
+        raw: target,
+        defanged: defangStr(target),
+        type: "Unknown Indicator",
+        score: 20,
+        level: "LOW",
+        verdict: "Generic String / Unrecognized Format",
+        category: "Unspecified",
+        dns: "N/A",
+        entropy: null,
+        tags: ["#Unrecognized-Type"],
+        mitre: [],
+        action: "Verify indicator format (ensure valid IPv4, Domain, URL or 32/64 char Hash).",
+        cdb: `${target}:LOW_20:Unknown`
+      });
+    }
+
+    // Initialize with Tor Exit Node by default
+    document.addEventListener("DOMContentLoaded", () => {
+      renderMatrix();
+      loadPreset("tor");
+    });
+  </script>
+</body>
+</html>
