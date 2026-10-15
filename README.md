@@ -1,6 +1,7 @@
 # ThreatPulse (v1.0.0) ⚡
 
 [![CI Pipeline](https://github.com/Voobrazhenie21-lab/threat-pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/Voobrazhenie21-lab/threat-pulse/actions/workflows/ci.yml)
+[![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](#2-running-via-docker-)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://python.org)
 [![Live Web Demo](https://img.shields.io/badge/Live%20Demo-Interactive%20Dashboard-10b981?style=flat&logo=google-chrome&logoColor=white)](https://voobrazhenie21-lab.github.io/threat-pulse/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -87,7 +88,22 @@ uv pip install -e .
 python -m threat_pulse --version
 ```
 
-### 2. Single Indicator Inspection
+### 2. Running via Docker 🐳
+
+Run ThreatPulse in an isolated, secure non-root Alpine container without needing Python installed on the host system:
+
+```bash
+# Build the lightweight Alpine image (~45MB)
+docker build -t threat-pulse .
+
+# Inspect a single indicator directly
+docker run --rm threat-pulse 185.220.101.5
+
+# Analyze a log file and export to Wazuh CDB list format
+docker run --rm -v $(pwd):/data threat-pulse -f /data/samples/sample_iocs.txt --format wazuh-cdb
+```
+
+### 3. Single Indicator Inspection
 
 ```bash
 # Analyze a known Tor Exit Node
@@ -100,7 +116,7 @@ threat-pulse a60c52bb53a5c0b89cf53dc5bb7c2c129219b16e4ee7d9c6e3b5e43a9b1c9d2f
 threat-pulse xkjqpw987dfghk123498.top
 ```
 
-### 3. Batch Triage from Log Files
+### 4. Batch Triage from Log Files
 
 Extract all IOCs from an access log, firewall dump, or ticket export and render a summary table:
 
@@ -108,13 +124,13 @@ Extract all IOCs from an access log, firewall dump, or ticket export and render 
 threat-pulse -f samples/sample_iocs.txt --format table
 ```
 
-### 4. Exporting to Wazuh SIEM CDB Lists
+### 5. Exporting to Wazuh SIEM CDB Lists
 
 ```bash
 threat-pulse -f samples/sample_iocs.txt --format wazuh-cdb -o /var/ossec/etc/lists/threat_pulse.cdb
 ```
 
-### 5. Quick Defanging & Refanging Helpers
+### 6. Quick Defanging & Refanging Helpers
 
 ```bash
 # Defang a dangerous URL for safe sharing
