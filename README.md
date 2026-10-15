@@ -1,5 +1,6 @@
 # ThreatPulse (v1.0.0) ⚡
 
+[![CI Pipeline](https://github.com/Voobrazhenie21-lab/threat-pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/Voobrazhenie21-lab/threat-pulse/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://python.org)
 [![Live Web Demo](https://img.shields.io/badge/Live%20Demo-Interactive%20Dashboard-10b981?style=flat&logo=google-chrome&logoColor=white)](https://voobrazhenie21-lab.github.io/threat-pulse/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
