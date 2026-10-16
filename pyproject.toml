@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "threat-pulse"
+name = "threatpulse-cli"
 version = "1.0.0"
 description = "Fast, zero-dependency Threat Intelligence & IOC enrichment CLI for SOC Analysts & Incident Responders"
 readme = "README.md"

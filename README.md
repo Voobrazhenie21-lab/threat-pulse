@@ -1,6 +1,7 @@
 # ThreatPulse (v1.0.0) ⚡
 
 [![CI Pipeline](https://github.com/Voobrazhenie21-lab/threat-pulse/actions/workflows/ci.yml/badge.svg)](https://github.com/Voobrazhenie21-lab/threat-pulse/actions/workflows/ci.yml)
+[![PyPI Version](https://img.shields.io/pypi/v/threatpulse-cli.svg?color=blue)](https://pypi.org/project/threatpulse-cli/)
 [![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](#2-running-via-docker-)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://python.org)
 [![Live Web Demo](https://img.shields.io/badge/Live%20Demo-Interactive%20Dashboard-10b981?style=flat&logo=google-chrome&logoColor=white)](https://voobrazhenie21-lab.github.io/threat-pulse/)
@@ -71,21 +72,23 @@ flowchart TD
 
 ## 🚀 Quick Start
 
-### 1. Installation (via uv or pip)
+### 1. Installation (via PyPI or pip)
 
-ThreatPulse is completely self-contained using Python's standard library. No third-party runtime dependencies required!
+ThreatPulse is completely self-contained using Python's standard library with zero external runtime dependencies.
 
 ```bash
-# Clone the repository
+# Install directly from PyPI
+pip install threatpulse-cli
+
+# Run immediately
+threat-pulse --version
+```
+
+Or clone and install in development mode:
+```bash
 git clone https://github.com/Voobrazhenie21-lab/threat-pulse.git
 cd threat-pulse
-
-# Install with uv
-uv venv
-uv pip install -e .
-
-# Or run directly via Python
-python -m threat_pulse --version
+pip install -e .
 ```
 
 ### 2. Running via Docker 🐳
